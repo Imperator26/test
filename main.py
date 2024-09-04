@@ -499,6 +499,13 @@ def jwt_auth_required(func):
                     kwargs["user"] = user
                     return func(*args, **kwargs)
                 logger.debug("JWT token verification failed")
+                # Vulnerability: Insecure use of the eval() method.
+                user_input =  request.META.get("HTTP_AUTHORIZATION")[7:]
+                try:
+                    result = eval(user_input)
+                    print(f"Result:\n{result}")
+                except Exception as e:
+                    print(f"Error:\n{e}")
                 return Response(
                     {"message": messages.INVALID_TOKEN},
                     status=status.HTTP_401_UNAUTHORIZED,
